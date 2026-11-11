@@ -7,6 +7,7 @@ import org.schabi.newpipe.extractor.downloader.Request
 import org.schabi.newpipe.extractor.downloader.Response
 import org.schabi.newpipe.extractor.exceptions.ReCaptchaException
 import org.schabi.newpipe.extractor.localization.Localization
+import org.schabi.newpipe.extractor.services.youtube.extractors.YoutubeStreamExtractor
 import org.schabi.newpipe.extractor.stream.DeliveryMethod
 import org.schabi.newpipe.extractor.stream.StreamInfo
 import okhttp3.OkHttpClient
@@ -84,6 +85,7 @@ class NewPipeStreamExtractor : StreamExtractor {
         private fun ensureInitialized() {
             if (initialized) return
             NewPipe.init(OkHttpDownloader(), Localization.DEFAULT)
+            YoutubeStreamExtractor.setPoTokenProvider(PoTokenStore)
             initialized = true
         }
     }

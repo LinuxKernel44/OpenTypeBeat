@@ -12,7 +12,16 @@ class YtDlpStreamExtractor : StreamExtractor {
 
     override fun resolve(hint: TrackHint): ResolvedStream {
         try {
-            val json = JSONObject(module().callAttr("resolve", hint.videoId, hint.preferLowBitrate).toString())
+            val tokens = PoTokenStore.ytDlpTokens()
+            val raw = module().callAttr(
+                "resolve",
+                hint.videoId,
+                hint.preferLowBitrate,
+                tokens?.first.orEmpty(),
+                tokens?.second.orEmpty(),
+                tokens?.third.orEmpty(),
+            )
+            val json = JSONObject(raw.toString())
             return ResolvedStream(
                 url = json.getString("url"),
                 mimeType = json.optString("mime").ifEmpty { null },

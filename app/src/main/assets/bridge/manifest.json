@@ -10,7 +10,8 @@
     "nativeMessaging",
     "geckoViewAddons",
     "webRequest",
-    "*://*.googlevideo.com/*"
+    "*://*.googlevideo.com/*",
+    "*://*.youtube.com/*"
   ],
   "background": { "scripts": ["background.js"] },
   "content_scripts": [

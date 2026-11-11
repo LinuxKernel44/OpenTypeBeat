@@ -15,6 +15,7 @@ import androidx.media3.common.util.UnstableApi
 import io.github.linuxkernel44.opentypebeat.Prefs
 import io.github.linuxkernel44.opentypebeat.extract.Extractors
 import io.github.linuxkernel44.opentypebeat.extract.PageCaptureStreamExtractor
+import io.github.linuxkernel44.opentypebeat.extract.PoTokenStore
 import io.github.linuxkernel44.opentypebeat.extract.TrackHint
 import io.github.linuxkernel44.opentypebeat.player.PlaybackService
 import io.github.linuxkernel44.opentypebeat.player.PlayerHolder
@@ -128,7 +129,15 @@ class PlaybackCoordinator(private val app: Application) {
                 PageCaptureStreamExtractor.onAudioUrl(json.optString("url"))
                 return
             }
+            "poToken" -> {
+                PoTokenStore.onTokenMessage(json)
+                return
+            }
             "net" -> {
+                json.optString("note").takeIf { it.isNotEmpty() }?.let {
+                    Log.i(TAG, "page note: $it client=${json.optString("client")} fields=${json.optString("fields")}")
+                    return
+                }
                 // Diagnostics: googlevideo requests that carry no mime parameter (e.g. SABR streaming).
                 if (++netEvents % 25 == 1) {
                     Log.i(TAG, "page media request: sabr=${json.optBoolean("sabr")} mime=${json.optBoolean("mime")} method=${json.optString("method")}")
@@ -149,6 +158,7 @@ class PlaybackCoordinator(private val app: Application) {
             art = json.optString("art"),
         )
         if (state.id.isEmpty()) return
+        PoTokenStore.onPageSession(json.optString("vd"), json.optBoolean("loggedIn"))
         latest = state
         PlayerHolder.mirror(app).update(
             id = state.id,

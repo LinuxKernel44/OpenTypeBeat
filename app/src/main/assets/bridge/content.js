@@ -59,6 +59,22 @@
     }
   }
 
+  // Session facts exposed by the page's own config; used to bind PO tokens to the right visitor.
+  function sessionInfo() {
+    try {
+      const cfg = window.wrappedJSObject.ytcfg;
+      if (!cfg || typeof cfg.get !== "function") return { vd: "", loggedIn: false };
+      let vd = cfg.get("VISITOR_DATA") || "";
+      if (!vd) {
+        const ctx = cfg.get("INNERTUBE_CONTEXT");
+        vd = (ctx && ctx.client && ctx.client.visitorData) || "";
+      }
+      return { vd: String(vd || ""), loggedIn: !!cfg.get("LOGGED_IN") };
+    } catch (e) {
+      return { vd: "", loggedIn: false };
+    }
+  }
+
   function snapshot() {
     const video = mainVideo();
     if (!video) return null;
@@ -73,8 +89,11 @@
       video.muted = false;
     }
     const ms = mediaSessionMeta();
+    const session = sessionInfo();
     return {
       t: "state",
+      vd: session.vd,
+      loggedIn: session.loggedIn,
       id,
       playing: !video.paused && !video.ended && video.readyState > 2,
       ended: video.ended,
