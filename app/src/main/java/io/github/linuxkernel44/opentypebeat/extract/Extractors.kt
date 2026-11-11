@@ -6,35 +6,32 @@ import android.util.Log
 object Extractors {
     private const val TAG = "Extractors"
 
+    private val page by lazy { PageCaptureStreamExtractor() }
     private val newPipe by lazy { NewPipeStreamExtractor() }
     private val ytDlp by lazy { YtDlpStreamExtractor() }
 
     fun chainFor(preference: String): List<StreamExtractor> = when (preference) {
+        "page" -> listOf(page)
         "newpipe" -> listOf(newPipe)
         "ytdlp" -> listOf(ytDlp)
-        else -> listOf(newPipe, ytDlp)
+        else -> listOf(page, newPipe, ytDlp)
     }
 
     /**
      * Tries each extractor in order, skipping the ones in [skip], and returns the first success.
      * Blocking; call from a background thread.
      */
-    fun resolve(
-        videoId: String,
-        preference: String,
-        preferLowBitrate: Boolean,
-        skip: Set<String> = emptySet(),
-    ): ResolvedStream {
+    fun resolve(hint: TrackHint, preference: String, skip: Set<String> = emptySet()): ResolvedStream {
         var last: Exception? = null
         for (extractor in chainFor(preference)) {
             if (extractor.name in skip) continue
             try {
-                return extractor.resolve(videoId, preferLowBitrate)
+                return extractor.resolve(hint)
             } catch (e: Exception) {
-                Log.w(TAG, "${extractor.name} failed for $videoId: ${e.message}")
+                Log.w(TAG, "${extractor.name} failed for ${hint.videoId}: ${e.message}")
                 last = e
             }
         }
-        throw ExtractionException("No extractor could resolve $videoId", last)
+        throw ExtractionException("No extractor could resolve ${hint.videoId}", last)
     }
 }

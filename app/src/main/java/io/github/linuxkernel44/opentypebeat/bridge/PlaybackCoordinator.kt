@@ -14,6 +14,8 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import io.github.linuxkernel44.opentypebeat.Prefs
 import io.github.linuxkernel44.opentypebeat.extract.Extractors
+import io.github.linuxkernel44.opentypebeat.extract.PageCaptureStreamExtractor
+import io.github.linuxkernel44.opentypebeat.extract.TrackHint
 import io.github.linuxkernel44.opentypebeat.player.PlaybackService
 import io.github.linuxkernel44.opentypebeat.player.PlayerHolder
 import kotlinx.coroutines.CoroutineScope
@@ -92,6 +94,7 @@ class PlaybackCoordinator(private val app: Application) {
     }
 
     private var lastSource: String? = null
+    private var trackStartedAt = 0L
 
     init {
         main.post { player.addListener(playerListener) }
@@ -124,6 +127,10 @@ class PlaybackCoordinator(private val app: Application) {
     }
 
     private fun handleMessage(json: JSONObject) {
+        if (json.optString("t") == "audioUrl") {
+            PageCaptureStreamExtractor.onAudioUrl(json.optString("url"))
+            return
+        }
         if (json.optString("t") != "state") return
         val state = PageState(
             id = json.optString("id"),
@@ -151,6 +158,7 @@ class PlaybackCoordinator(private val app: Application) {
         }
         if (s.id != currentId) {
             currentId = s.id
+            trackStartedAt = System.currentTimeMillis()
             failedExtractors.clear()
             loadTrack(s.id, retry = false)
             return
@@ -179,9 +187,13 @@ class PlaybackCoordinator(private val app: Application) {
             try {
                 val resolved = withContext(Dispatchers.IO) {
                     Extractors.resolve(
-                        videoId = videoId,
+                        hint = TrackHint(
+                            videoId = videoId,
+                            durationSeconds = latest?.takeIf { it.id == videoId }?.dur ?: 0.0,
+                            startedAtMs = trackStartedAt,
+                            preferLowBitrate = prefs.audioQuality == "low",
+                        ),
                         preference = prefs.extractor,
-                        preferLowBitrate = prefs.audioQuality == "low",
                         skip = failedExtractors,
                     )
                 }
@@ -213,7 +225,10 @@ class PlaybackCoordinator(private val app: Application) {
                 // Fall back to the page's own audio so the user is never left in silence.
                 sendCommand("pageAudio", "value" to true)
                 applyRemote { player.pause() }
-                onMessage?.invoke("Audio extraction failed, using the page's audio: ${e.message}")
+                onMessage?.invoke(
+                    "Audio extraction failed, playing the page's audio instead. " +
+                        "If YouTube asks you to confirm you're not a bot, sign in with your Google account from the menu.",
+                )
             }
         }
     }

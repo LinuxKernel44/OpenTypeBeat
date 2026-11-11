@@ -25,12 +25,14 @@
     <string name="pref_about_summary">Free software under the GPL-3.0. Powered by GeckoView, NewPipeExtractor, yt-dlp and Media3.</string>
 
     <string-array name="extractor_entries">
-        <item>Automatic (NewPipeExtractor, then yt-dlp)</item>
+        <item>Automatic (page capture, NewPipeExtractor, yt-dlp)</item>
+        <item>Page capture only</item>
         <item>NewPipeExtractor only</item>
         <item>yt-dlp only</item>
     </string-array>
     <string-array name="extractor_values">
         <item>auto</item>
+        <item>page</item>
         <item>newpipe</item>
         <item>ytdlp</item>
     </string-array>

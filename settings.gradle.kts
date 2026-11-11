@@ -13,6 +13,7 @@ dependencyResolutionManagement {
         mavenCentral()
         maven("https://maven.mozilla.org/maven2/")
         maven("https://jitpack.io")
+        maven("https://chaquo.com/maven")
     }
 }
 

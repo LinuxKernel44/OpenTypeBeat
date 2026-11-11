@@ -7,4 +7,14 @@ import io.github.linuxkernel44.opentypebeat.bridge.PlaybackCoordinator
 @UnstableApi
 class OpenTypeBeatApp : Application() {
     val coordinator: PlaybackCoordinator by lazy { PlaybackCoordinator(this) }
+
+    override fun onCreate() {
+        super.onCreate()
+        instance = this
+    }
+
+    companion object {
+        lateinit var instance: OpenTypeBeatApp
+            private set
+    }
 }

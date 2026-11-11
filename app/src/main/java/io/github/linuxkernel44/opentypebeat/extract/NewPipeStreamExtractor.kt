@@ -7,7 +7,6 @@ import org.schabi.newpipe.extractor.downloader.Request
 import org.schabi.newpipe.extractor.downloader.Response
 import org.schabi.newpipe.extractor.exceptions.ReCaptchaException
 import org.schabi.newpipe.extractor.localization.Localization
-import org.schabi.newpipe.extractor.services.youtube.extractors.YoutubeStreamExtractor
 import org.schabi.newpipe.extractor.stream.DeliveryMethod
 import org.schabi.newpipe.extractor.stream.StreamInfo
 import okhttp3.OkHttpClient
@@ -18,10 +17,11 @@ import java.util.concurrent.TimeUnit
 class NewPipeStreamExtractor : StreamExtractor {
     override val name = "NewPipeExtractor"
 
-    override fun resolve(videoId: String, preferLowBitrate: Boolean): ResolvedStream {
+    override fun resolve(hint: TrackHint): ResolvedStream {
         ensureInitialized()
+        val preferLowBitrate = hint.preferLowBitrate
         try {
-            val info = StreamInfo.getInfo(ServiceList.YouTube, "https://www.youtube.com/watch?v=$videoId")
+            val info = StreamInfo.getInfo(ServiceList.YouTube, "https://www.youtube.com/watch?v=${hint.videoId}")
             val candidates = info.audioStreams.filter {
                 it.isUrl && it.content.isNotEmpty() && it.deliveryMethod == DeliveryMethod.PROGRESSIVE_HTTP
             }

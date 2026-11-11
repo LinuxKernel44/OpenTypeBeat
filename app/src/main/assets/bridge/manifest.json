@@ -6,7 +6,12 @@
   "browser_specific_settings": {
     "gecko": { "id": "bridge@opentypebeat.linuxkernel44.github.io" }
   },
-  "permissions": ["nativeMessaging", "geckoViewAddons"],
+  "permissions": [
+    "nativeMessaging",
+    "geckoViewAddons",
+    "webRequest",
+    "*://*.googlevideo.com/*"
+  ],
   "background": { "scripts": ["background.js"] },
   "content_scripts": [
     {

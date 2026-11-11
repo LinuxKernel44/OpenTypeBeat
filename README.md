@@ -13,7 +13,8 @@ with a media notification, lock-screen controls and background playback.
 - **Native audio playback**: the audio stream of the current video is extracted on the fly and played
   with Media3/ExoPlayer — pause, seek bar, next/previous, notification, headset and Bluetooth controls,
   background playback.
-- Two extractors: **NewPipeExtractor** (default) with **yt-dlp** as a fallback, selectable in settings.
+- Three audio sources, tried in order and selectable in settings: **page capture** (reuses the audio
+  stream the signed-in page itself loads), **NewPipeExtractor**, and **yt-dlp** (embedded Python).
 - One-tap **beat style chips** (Trap, Drill, Boom Bap, Lo-fi, R&B, Afrobeat, …) that search
   "`<style> type beat`".
 - Opens `youtube.com`, `music.youtube.com` and `youtu.be` links.
@@ -37,8 +38,8 @@ audio is switched back on so you are never left in silence.
 
 ## Building
 
-Requirements: JDK 17, the Android SDK (platform 37.2, build-tools 36+), Python 3 (for the bundled
-yt-dlp, built through Chaquopy).
+Requirements: JDK 17, the Android SDK (platform 37.2, build-tools 36+) and Python 3.10+ on the PATH
+(used by Chaquopy to install the bundled yt-dlp).
 
 ```bash
 ./gradlew assembleDebug            # debug APK
@@ -57,6 +58,13 @@ storePassword=...
 keyAlias=...
 keyPassword=...
 ```
+
+## Known limitations
+
+- YouTube may answer "Sign in to confirm you're not a bot" for some networks. Sign in with your Google
+  account from the app menu; if no stream can be extracted, the page's own audio is used as a fallback.
+- Release builds target **arm64-v8a** only (Python 3.12 via Chaquopy has no 32-bit ARM build).
+  Use `-PabiFilters=x86_64` for an emulator build.
 
 ## Disclaimer
 

@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
+    id("com.chaquo.python")
 }
 
 val keystoreProps = Properties().apply {
@@ -13,7 +14,7 @@ val keystoreProps = Properties().apply {
 // ABIs bundled in the APK. Override with -PabiFilters=x86_64 for emulator builds.
 val abis = (project.findProperty("abiFilters") as String?)
     ?.split(",")?.map { it.trim() }
-    ?: listOf("arm64-v8a", "armeabi-v7a")
+    ?: listOf("arm64-v8a")
 
 android {
     namespace = "io.github.linuxkernel44.opentypebeat"
@@ -83,6 +84,15 @@ android {
 
 kotlin {
     compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
+}
+
+chaquopy {
+    defaultConfig {
+        version = "3.12"
+        pip {
+            install("yt-dlp")
+        }
+    }
 }
 
 dependencies {

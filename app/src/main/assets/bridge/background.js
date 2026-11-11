@@ -42,4 +42,20 @@ browser.runtime.onConnect.addListener((port) => {
   });
 });
 
+// Report the audio stream URLs the page itself requests. They already carry everything
+// YouTube requires (session, proof-of-origin token), so the native player can reuse them.
+if (browser.webRequest && browser.webRequest.onBeforeRequest) {
+  browser.webRequest.onBeforeRequest.addListener(
+    (details) => {
+      if (!/[?&]mime=audio/.test(details.url) || !nativePort) return;
+      try {
+        nativePort.postMessage({ t: "audioUrl", url: details.url });
+      } catch (e) {
+        /* reconnect handled by onDisconnect */
+      }
+    },
+    { urls: ["*://*.googlevideo.com/videoplayback*"] }
+  );
+}
+
 connectNative();
