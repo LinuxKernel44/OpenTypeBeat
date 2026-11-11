@@ -115,14 +115,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        PlayerHolder.get(this).addListener(playerListener)
+        PlayerHolder.mirror(this).addListener(playerListener)
         updateMiniPlayer()
         binding.root.post(progressTicker)
     }
 
     override fun onStop() {
         binding.root.removeCallbacks(progressTicker)
-        PlayerHolder.get(this).removeListener(playerListener)
+        PlayerHolder.mirror(this).removeListener(playerListener)
         super.onStop()
     }
 
@@ -186,7 +186,7 @@ class MainActivity : AppCompatActivity() {
     // ---- Mini player --------------------------------------------------------------------------
 
     private fun setupMiniPlayer() {
-        val player = PlayerHolder.get(this)
+        val player = PlayerHolder.mirror(this)
         binding.btnPlayPause.setOnClickListener {
             if (player.playWhenReady) player.pause() else player.play()
         }
@@ -213,7 +213,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateMiniPlayer() {
-        val player = PlayerHolder.get(this)
+        val player = PlayerHolder.mirror(this)
         val hasItem = player.currentMediaItem != null
         binding.miniPlayer.isVisible = hasItem
         if (!hasItem) return
@@ -228,7 +228,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateProgress() {
         if (seeking) return
-        val player = PlayerHolder.get(this)
+        val player = PlayerHolder.mirror(this)
         val dur = player.duration.takeIf { it > 0 } ?: 0L
         binding.seekBar.max = dur.toInt()
         binding.seekBar.progress = player.currentPosition.toInt()

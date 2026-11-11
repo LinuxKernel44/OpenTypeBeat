@@ -24,17 +24,19 @@
     <string name="pref_reinstall_extensions">Reinstall uBlock Origin and SponsorBlock</string>
     <string name="pref_reinstall_extensions_summary">Fetches the latest signed versions from addons.mozilla.org</string>
     <string name="pref_category_about">About</string>
-    <string name="pref_about_title">OpenTypeBeat 1.0.1</string>
+    <string name="pref_about_title">OpenTypeBeat 1.0.2</string>
     <string name="pref_about_summary">Free software under the GPL-3.0. Powered by GeckoView, NewPipeExtractor, yt-dlp and Media3.</string>
 
     <string-array name="extractor_entries">
         <item>Automatic (page capture, NewPipeExtractor, yt-dlp)</item>
+        <item>Page audio only (no extraction)</item>
         <item>Page capture only</item>
         <item>NewPipeExtractor only</item>
         <item>yt-dlp only</item>
     </string-array>
     <string-array name="extractor_values">
         <item>auto</item>
+        <item>off</item>
         <item>page</item>
         <item>newpipe</item>
         <item>ytdlp</item>

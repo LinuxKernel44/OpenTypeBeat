@@ -47,7 +47,22 @@ browser.runtime.onConnect.addListener((port) => {
 if (browser.webRequest && browser.webRequest.onBeforeRequest) {
   browser.webRequest.onBeforeRequest.addListener(
     (details) => {
-      if (!/[?&]mime=audio/.test(details.url) || !nativePort) return;
+      if (!nativePort) return;
+      const hasAudioMime = /[?&]mime=audio/.test(details.url);
+      if (!hasAudioMime) {
+        // Diagnostics only: SABR streaming requests carry no mime parameter.
+        try {
+          nativePort.postMessage({
+            t: "net",
+            sabr: /[?&]sabr=1/.test(details.url),
+            mime: /[?&]mime=/.test(details.url),
+            method: details.method,
+          });
+        } catch (e) {
+          /* ignore */
+        }
+        return;
+      }
       try {
         nativePort.postMessage({ t: "audioUrl", url: details.url });
       } catch (e) {

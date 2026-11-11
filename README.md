@@ -63,6 +63,10 @@ keyPassword=...
 
 - YouTube may answer "Sign in to confirm you're not a bot" for some networks. Sign in with your Google
   account from the app menu; if no stream can be extracted, the page's own audio is used as a fallback.
+- YouTube increasingly requires proof-of-origin (PO) tokens and uses SABR streaming, which breaks
+  stream extraction by third-party extractors. When extraction fails, the page's own audio is used
+  and the notification, lock-screen controls, seek bar and background playback still work through a
+  player that mirrors the page. "Page audio only" in Settings skips the extraction attempts.
 - Release builds target **arm64-v8a** only (Python 3.12 via Chaquopy has no 32-bit ARM build).
   Use `-PabiFilters=x86_64` for an emulator build.
 

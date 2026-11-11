@@ -7,9 +7,14 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import io.github.linuxkernel44.opentypebeat.OpenTypeBeatApp
 import okhttp3.OkHttpClient
 
-/** Process-wide ExoPlayer, shared by the playback service and the page-sync coordinator. */
+/**
+ * Process-wide players:
+ *  - [get]: the ExoPlayer that plays the extracted audio stream (not exposed to the UI),
+ *  - [mirror]: the Player that mirrors the web page and backs the MediaSession and the UI.
+ */
 @UnstableApi
 object PlayerHolder {
     private const val USER_AGENT =
@@ -18,9 +23,20 @@ object PlayerHolder {
     @Volatile
     private var player: ExoPlayer? = null
 
+    @Volatile
+    private var mirror: PageMirrorPlayer? = null
+
     fun get(context: Context): ExoPlayer =
         player ?: synchronized(this) {
             player ?: build(context.applicationContext).also { player = it }
+        }
+
+    fun mirror(@Suppress("UNUSED_PARAMETER") context: Context): PageMirrorPlayer =
+        mirror ?: synchronized(this) {
+            mirror ?: PageMirrorPlayer { cmd, seconds ->
+                val coordinator = OpenTypeBeatApp.instance.coordinator
+                if (seconds != null) coordinator.sendCommand(cmd, "t" to seconds) else coordinator.sendCommand(cmd)
+            }.also { mirror = it }
         }
 
     private fun build(context: Context): ExoPlayer {

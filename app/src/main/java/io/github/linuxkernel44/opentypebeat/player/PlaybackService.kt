@@ -22,7 +22,7 @@ class PlaybackService : MediaSessionService() {
         super.onCreate()
         val coordinator = (application as OpenTypeBeatApp).coordinator
         val player = PageControlledPlayer(
-            PlayerHolder.get(this),
+            PlayerHolder.mirror(this),
             onNext = { coordinator.sendCommand("next") },
             onPrevious = { coordinator.sendCommand("previous") },
         )

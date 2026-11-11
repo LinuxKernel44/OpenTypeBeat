@@ -11,6 +11,7 @@ object Extractors {
     private val ytDlp by lazy { YtDlpStreamExtractor() }
 
     fun chainFor(preference: String): List<StreamExtractor> = when (preference) {
+        "off" -> emptyList()
         "page" -> listOf(page)
         "newpipe" -> listOf(newPipe)
         "ytdlp" -> listOf(ytDlp)

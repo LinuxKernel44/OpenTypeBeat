@@ -50,6 +50,10 @@ class PlaybackCoordinator(private val app: Application) {
     private var lastNativeChangeAt = 0L
     private var lastDriftSeekAt = 0L
     private var failedExtractors = mutableSetOf<String>()
+    private var consecutiveFailures = 0
+    private var tracksSeen = 0
+    private var failureShown = false
+    private var netEvents = 0
 
     /** UI callbacks (main thread). */
     var onMessage: ((String) -> Unit)? = null
@@ -67,20 +71,12 @@ class PlaybackCoordinator(private val app: Application) {
     )
 
     private val playerListener = object : Player.Listener {
+        // The hidden ExoPlayer only reacts to the system (audio focus loss, headphones unplugged);
+        // user commands go through the PageMirrorPlayer straight to the page.
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
             if (applyingRemote) return
             lastNativeChangeAt = System.currentTimeMillis()
             sendCommand(if (playWhenReady) "play" else "pause")
-        }
-
-        override fun onPositionDiscontinuity(
-            oldPosition: Player.PositionInfo,
-            newPosition: Player.PositionInfo,
-            reason: Int,
-        ) {
-            if (applyingRemote || reason != Player.DISCONTINUITY_REASON_SEEK) return
-            lastNativeChangeAt = System.currentTimeMillis()
-            sendCommand("seek", "t" to newPosition.positionMs / 1000.0)
         }
 
         override fun onPlayerError(error: PlaybackException) {
@@ -127,9 +123,18 @@ class PlaybackCoordinator(private val app: Application) {
     }
 
     private fun handleMessage(json: JSONObject) {
-        if (json.optString("t") == "audioUrl") {
-            PageCaptureStreamExtractor.onAudioUrl(json.optString("url"))
-            return
+        when (json.optString("t")) {
+            "audioUrl" -> {
+                PageCaptureStreamExtractor.onAudioUrl(json.optString("url"))
+                return
+            }
+            "net" -> {
+                // Diagnostics: googlevideo requests that carry no mime parameter (e.g. SABR streaming).
+                if (++netEvents % 25 == 1) {
+                    Log.i(TAG, "page media request: sabr=${json.optBoolean("sabr")} mime=${json.optBoolean("mime")} method=${json.optString("method")}")
+                }
+                return
+            }
         }
         if (json.optString("t") != "state") return
         val state = PageState(
@@ -145,6 +150,15 @@ class PlaybackCoordinator(private val app: Application) {
         )
         if (state.id.isEmpty()) return
         latest = state
+        PlayerHolder.mirror(app).update(
+            id = state.id,
+            title = state.title,
+            artist = state.artist,
+            artwork = state.art,
+            playing = state.playing && !state.ad,
+            positionSeconds = state.pos,
+            durationSeconds = state.dur,
+        )
         onPageState(state)
     }
 
@@ -160,7 +174,19 @@ class PlaybackCoordinator(private val app: Application) {
             currentId = s.id
             trackStartedAt = System.currentTimeMillis()
             failedExtractors.clear()
-            loadTrack(s.id, retry = false)
+            tracksSeen++
+            ensureServiceRunning()
+            // After repeated failures stop delaying every track by the extraction attempts and
+            // let the page play its own audio; retry extraction now and then.
+            val skip = prefs.extractor == "off" || (consecutiveFailures >= 2 && tracksSeen % 6 != 0)
+            if (skip) {
+                extractJob?.cancel()
+                usePageAudio()
+            } else {
+                // Keep the page audible while the stream is being resolved (no silent start).
+                sendCommand("pageAudio", "value" to true)
+                loadTrack(s.id, retry = false)
+            }
             return
         }
         if (extractJob?.isActive == true) return // still resolving the stream
@@ -211,9 +237,9 @@ class PlaybackCoordinator(private val app: Application) {
                             .build(),
                     )
                     .build()
+                consecutiveFailures = 0
                 sendCommand("pageAudio", "value" to false)
                 applyRemote {
-                    ensureServiceRunning()
                     player.setMediaItem(item, ((s?.pos ?: 0.0) * 1000).toLong())
                     player.prepare()
                     player.playWhenReady = s?.playing ?: true
@@ -222,14 +248,26 @@ class PlaybackCoordinator(private val app: Application) {
                 throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Extraction failed for $videoId (retry=$retry)", e)
+                consecutiveFailures++
                 // Fall back to the page's own audio so the user is never left in silence.
-                sendCommand("pageAudio", "value" to true)
-                applyRemote { player.pause() }
-                onMessage?.invoke(
-                    "Audio extraction failed, playing the page's audio instead. " +
-                        "If YouTube asks you to confirm you're not a bot, sign in with your Google account from the menu.",
-                )
+                usePageAudio()
+                if (!failureShown) {
+                    failureShown = true
+                    onMessage?.invoke(
+                        "Could not extract the audio stream (YouTube blocks it), so the page's own audio is used. " +
+                            "Media controls still work. You can pick \"Page audio only\" in Settings.",
+                    )
+                }
             }
+        }
+    }
+
+    /** The page plays its own audio; the native player stays idle. */
+    private fun usePageAudio() {
+        sendCommand("pageAudio", "value" to true)
+        applyRemote {
+            player.stop()
+            player.clearMediaItems()
         }
     }
 
