@@ -17,6 +17,12 @@ class Prefs(context: Context) {
     /** "music" or "youtube". */
     val startPage: String get() = sp.getString(KEY_START_PAGE, "music") ?: "music"
 
+    /**
+     * Disables the SpiderMonkey JIT. Works around SIGILL crashes inside JIT-generated code seen
+     * on some devices. Pages are slower; applied when the app is (re)started.
+     */
+    val compatibilityMode: Boolean get() = sp.getBoolean(KEY_COMPAT_MODE, true)
+
     var desktopSite: Boolean
         get() = sp.getBoolean(KEY_DESKTOP, false)
         set(value) = sp.edit().putBoolean(KEY_DESKTOP, value).apply()
@@ -26,6 +32,7 @@ class Prefs(context: Context) {
         const val KEY_AUDIO_QUALITY = "audio_quality"
         const val KEY_START_PAGE = "start_page"
         const val KEY_DESKTOP = "desktop_site"
+        const val KEY_COMPAT_MODE = "compat_mode"
         const val KEY_REINSTALL_EXTENSIONS = "reinstall_extensions"
     }
 }

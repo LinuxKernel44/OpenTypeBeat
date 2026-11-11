@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.media3.common.util.UnstableApi
 import io.github.linuxkernel44.opentypebeat.BuildConfig
 import io.github.linuxkernel44.opentypebeat.OpenTypeBeatApp
+import io.github.linuxkernel44.opentypebeat.Prefs
 import org.mozilla.geckoview.AllowOrDeny
 import org.mozilla.geckoview.GeckoResult
 import org.mozilla.geckoview.GeckoRuntime
@@ -77,15 +78,39 @@ object GeckoHolder {
     }
 
     private fun createRuntime(app: Context): GeckoRuntime {
-        val settings = GeckoRuntimeSettings.Builder()
+        val builder = GeckoRuntimeSettings.Builder()
             .remoteDebuggingEnabled(BuildConfig.DEBUG)
             .consoleOutput(BuildConfig.DEBUG)
             .aboutConfigEnabled(BuildConfig.DEBUG)
             .preferredColorScheme(GeckoRuntimeSettings.COLOR_SCHEME_SYSTEM)
-            .build()
+        if (Prefs(app).compatibilityMode) {
+            builder.configFilePath(writeCompatibilityConfig(app).absolutePath)
+        }
+        val settings = builder.build()
         val rt = GeckoRuntime.create(app, settings)
         setupExtensions(rt, app)
         return rt
+    }
+
+    /**
+     * Gecko config file that turns off every JavaScript JIT tier. Some devices crash with SIGILL
+     * inside SpiderMonkey's JIT-generated code (seen on a OnePlus CPH2747, Android 17).
+     */
+    private fun writeCompatibilityConfig(app: Context): java.io.File {
+        val file = java.io.File(app.filesDir, "gecko-compat-config.yaml")
+        file.writeText(
+            """
+            prefs:
+              javascript.options.baselinejit: false
+              javascript.options.ion: false
+              javascript.options.blinterp: false
+              javascript.options.native_regexp: false
+              javascript.options.wasm_baselinecompiler: false
+              javascript.options.wasm_optimizingjit: false
+              javascript.options.asmjs: false
+            """.trimIndent() + "\n",
+        )
+        return file
     }
 
     private fun setupExtensions(rt: GeckoRuntime, app: Context) {

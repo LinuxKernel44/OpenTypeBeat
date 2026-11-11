@@ -6,6 +6,9 @@
     <color name="otb_surface">#1E1E1E</color>
     <color name="otb_launcher_bg">#16161A</color>
 
+    <!-- Light icons (overflow menu, back arrow) on the dark toolbar. -->
+    <style name="ThemeOverlay.OpenTypeBeat.Toolbar" parent="ThemeOverlay.Material3.Dark.ActionBar" />
+
     <style name="Theme.OpenTypeBeat" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/otb_primary</item>
         <item name="colorOnPrimary">@color/otb_on_primary</item>

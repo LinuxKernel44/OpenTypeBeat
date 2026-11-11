@@ -28,6 +28,14 @@
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/pref_category_compat">
+        <SwitchPreferenceCompat
+            app:defaultValue="true"
+            app:key="compat_mode"
+            app:summary="@string/pref_compat_summary"
+            app:title="@string/pref_compat_title" />
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/pref_category_extensions">
         <Preference
             app:key="reinstall_extensions"
