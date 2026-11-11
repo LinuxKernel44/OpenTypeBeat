@@ -14,6 +14,7 @@ import org.schabi.newpipe.extractor.services.youtube.PoTokenResult
 object PoTokenStore : PoTokenProvider {
     private const val TAG = "PoTokenStore"
     private const val MAX_AGE_MS = 6L * 60 * 60 * 1000
+    private const val REAL_TOKEN_MIN_LENGTH = 40
 
     @Volatile private var visitorData: String = ""
     @Volatile private var playerToken: String = ""
@@ -56,21 +57,30 @@ object PoTokenStore : PoTokenProvider {
         )
     }
 
-    /** Arguments for yt-dlp's youtube extractor (empty when nothing was captured). */
+    /**
+     * The page first sends a short "cold start" token (about 16 characters) and only later the
+     * real attestation token (100+ characters). Prefer the real one for both uses.
+     */
+    private fun effectiveTokens(): Pair<String, String>? {
+        val player = playerToken.takeIf { it.length >= REAL_TOKEN_MIN_LENGTH }.orEmpty()
+        val streaming = streamingToken.takeIf { it.length >= REAL_TOKEN_MIN_LENGTH }.orEmpty()
+        val real = player.ifEmpty { streaming }.ifEmpty { return null }
+        return Pair(player.ifEmpty { real }, streaming.ifEmpty { real })
+    }
+
+    /** Arguments for yt-dlp's youtube extractor (null when nothing usable was captured). */
     fun ytDlpTokens(): Triple<String, String, String>? {
         if (!hasToken || visitorData.isEmpty()) return null
-        return Triple(visitorData, playerToken.ifEmpty { streamingToken }, streamingToken.ifEmpty { playerToken })
+        val (player, streaming) = effectiveTokens() ?: return null
+        return Triple(visitorData, player, streaming)
     }
 
     // ---- NewPipeExtractor PoTokenProvider ----------------------------------------------------
 
     private fun webResult(): PoTokenResult? {
         if (!hasToken || visitorData.isEmpty()) return null
-        return PoTokenResult(
-            visitorData,
-            playerToken.ifEmpty { streamingToken },
-            streamingToken.ifEmpty { playerToken },
-        )
+        val (player, streaming) = effectiveTokens() ?: return null
+        return PoTokenResult(visitorData, player, streaming)
     }
 
     override fun getWebClientPoToken(videoId: String): PoTokenResult? = webResult()

@@ -40,7 +40,14 @@ object PlayerHolder {
         }
 
     private fun build(context: Context): ExoPlayer {
-        val http = OkHttpDataSource.Factory(OkHttpClient.Builder().build()).setUserAgent(USER_AGENT)
+        val http = OkHttpDataSource.Factory(OkHttpClient.Builder().build())
+            .setUserAgent(USER_AGENT)
+            .setDefaultRequestProperties(
+                mapOf(
+                    "Origin" to "https://music.youtube.com",
+                    "Referer" to "https://music.youtube.com/",
+                ),
+            )
         return ExoPlayer.Builder(context)
             .setMediaSourceFactory(DefaultMediaSourceFactory(context).setDataSourceFactory(http))
             .setAudioAttributes(
