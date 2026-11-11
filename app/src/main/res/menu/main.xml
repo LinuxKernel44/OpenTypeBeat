@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_music"
+        android:title="@string/menu_music"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_youtube"
+        android:title="@string/menu_youtube"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_reload"
+        android:title="@string/menu_reload"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_signin"
+        android:title="@string/menu_signin"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_desktop"
+        android:checkable="true"
+        android:title="@string/menu_desktop"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_settings"
+        android:title="@string/settings"
+        app:showAsAction="never" />
+</menu>

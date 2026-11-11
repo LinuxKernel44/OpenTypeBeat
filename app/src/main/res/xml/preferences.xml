@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/pref_category_playback">
+        <ListPreference
+            app:defaultValue="auto"
+            app:entries="@array/extractor_entries"
+            app:entryValues="@array/extractor_values"
+            app:key="extractor"
+            app:title="@string/pref_extractor"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            app:defaultValue="best"
+            app:entries="@array/quality_entries"
+            app:entryValues="@array/quality_values"
+            app:key="audio_quality"
+            app:title="@string/pref_audio_quality"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/pref_category_browsing">
+        <ListPreference
+            app:defaultValue="music"
+            app:entries="@array/start_entries"
+            app:entryValues="@array/start_values"
+            app:key="start_page"
+            app:title="@string/pref_start_page"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/pref_category_extensions">
+        <Preference
+            app:key="reinstall_extensions"
+            app:summary="@string/pref_reinstall_extensions_summary"
+            app:title="@string/pref_reinstall_extensions" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/pref_category_about">
+        <Preference
+            app:key="about"
+            app:selectable="false"
+            app:summary="@string/pref_about_summary"
+            app:title="@string/pref_about_title" />
+    </PreferenceCategory>
+</PreferenceScreen>

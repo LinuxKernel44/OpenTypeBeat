@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="otb_primary">#FF6A3D</color>
+    <color name="otb_on_primary">#1A0A00</color>
+    <color name="otb_background">#121212</color>
+    <color name="otb_surface">#1E1E1E</color>
+    <color name="otb_launcher_bg">#16161A</color>
+
+    <style name="Theme.OpenTypeBeat" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/otb_primary</item>
+        <item name="colorOnPrimary">@color/otb_on_primary</item>
+        <item name="android:windowBackground">@color/otb_background</item>
+    </style>
+</resources>

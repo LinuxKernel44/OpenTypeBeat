@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+  "name": "OpenTypeBeat Bridge",
+  "version": "1.0.0",
+  "description": "Connects YouTube / YouTube Music pages to the native OpenTypeBeat audio player.",
+  "browser_specific_settings": {
+    "gecko": { "id": "bridge@opentypebeat.linuxkernel44.github.io" }
+  },
+  "permissions": ["nativeMessaging", "geckoViewAddons"],
+  "background": { "scripts": ["background.js"] },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://music.youtube.com/*",
+        "*://www.youtube.com/*",
+        "*://m.youtube.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ]
+}

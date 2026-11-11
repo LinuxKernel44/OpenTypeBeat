@@ -1,0 +1,9 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Five equalizer bars forming a "beat" -->
+    <path android:fillColor="#FF6A3D" android:pathData="M30,50h8v22h-8z" />
+    <path android:fillColor="#FF6A3D" android:pathData="M42,40h8v42h-8z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M54,30h8v62h-8z" />
+    <path android:fillColor="#FF6A3D" android:pathData="M66,42h8v38h-8z" />
+    <path android:fillColor="#FF6A3D" android:pathData="M78,52h8v18h-8z" />
+</vector>

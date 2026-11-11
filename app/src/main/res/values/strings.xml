@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OpenTypeBeat</string>
+    <string name="settings">Settings</string>
+    <string name="menu_music">YouTube Music</string>
+    <string name="menu_youtube">YouTube</string>
+    <string name="menu_reload">Reload</string>
+    <string name="menu_signin">Sign in with Google</string>
+    <string name="menu_desktop">Desktop site</string>
+    <string name="previous">Previous</string>
+    <string name="play_pause">Play / pause</string>
+    <string name="next">Next</string>
+    <string name="reinstalling_extensions">Reinstalling extensions…</string>
+
+    <string name="pref_category_playback">Playback</string>
+    <string name="pref_extractor">Audio extractor</string>
+    <string name="pref_audio_quality">Audio quality</string>
+    <string name="pref_category_browsing">Browsing</string>
+    <string name="pref_start_page">Start page</string>
+    <string name="pref_category_extensions">Extensions</string>
+    <string name="pref_reinstall_extensions">Reinstall uBlock Origin and SponsorBlock</string>
+    <string name="pref_reinstall_extensions_summary">Fetches the latest signed versions from addons.mozilla.org</string>
+    <string name="pref_category_about">About</string>
+    <string name="pref_about_title">OpenTypeBeat 1.0.0</string>
+    <string name="pref_about_summary">Free software under the GPL-3.0. Powered by GeckoView, NewPipeExtractor, yt-dlp and Media3.</string>
+
+    <string-array name="extractor_entries">
+        <item>Automatic (NewPipeExtractor, then yt-dlp)</item>
+        <item>NewPipeExtractor only</item>
+        <item>yt-dlp only</item>
+    </string-array>
+    <string-array name="extractor_values">
+        <item>auto</item>
+        <item>newpipe</item>
+        <item>ytdlp</item>
+    </string-array>
+    <string-array name="quality_entries">
+        <item>Best available</item>
+        <item>Data saver</item>
+    </string-array>
+    <string-array name="quality_values">
+        <item>best</item>
+        <item>low</item>
+    </string-array>
+    <string-array name="start_entries">
+        <item>YouTube Music</item>
+        <item>YouTube</item>
+    </string-array>
+    <string-array name="start_values">
+        <item>music</item>
+        <item>youtube</item>
+    </string-array>
+</resources>
