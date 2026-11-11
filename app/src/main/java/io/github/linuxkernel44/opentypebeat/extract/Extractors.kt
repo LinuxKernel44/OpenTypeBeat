@@ -23,13 +23,15 @@ object Extractors {
      * Blocking; call from a background thread.
      */
     fun resolve(hint: TrackHint, preference: String, skip: Set<String> = emptySet()): ResolvedStream {
-        var last: Exception? = null
+        var last: Throwable? = null
         for (extractor in chainFor(preference)) {
             if (extractor.name in skip) continue
             try {
                 return extractor.resolve(hint)
-            } catch (e: Exception) {
-                Log.w(TAG, "${extractor.name} failed for ${hint.videoId}: ${e.message}")
+            } catch (e: Throwable) {
+                // Also catches linkage / memory errors from the extractor libraries (Rhino, Python):
+                // a broken extractor must never take the whole app down.
+                Log.w(TAG, "${extractor.name} failed for ${hint.videoId}: ${e.javaClass.simpleName}: ${e.message}", e)
                 last = e
             }
         }

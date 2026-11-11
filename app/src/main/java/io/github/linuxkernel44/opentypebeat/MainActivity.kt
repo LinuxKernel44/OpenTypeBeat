@@ -152,6 +152,14 @@ class MainActivity : AppCompatActivity() {
                 item.isChecked = prefs.desktopSite
                 applyDesktopMode(prefs.desktopSite)
             }
+            R.id.action_share_log -> Thread {
+                try {
+                    val send = CrashLog.buildShareIntent(applicationContext)
+                    runOnUiThread { startActivity(Intent.createChooser(send, getString(R.string.menu_share_log))) }
+                } catch (e: Throwable) {
+                    runOnUiThread { Toast.makeText(this, "Could not build the log: ${e.message}", Toast.LENGTH_LONG).show() }
+                }
+            }.start()
             R.id.action_settings -> startActivity(Intent(this, SettingsActivity::class.java))
             else -> return super.onOptionsItemSelected(item)
         }

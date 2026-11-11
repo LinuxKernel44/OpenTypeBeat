@@ -9,6 +9,9 @@
     <!-- Light icons (overflow menu, back arrow) on the dark toolbar. -->
     <style name="ThemeOverlay.OpenTypeBeat.Toolbar" parent="ThemeOverlay.Material3.Dark.ActionBar" />
 
+    <!-- Dark popup menu to match the always-dark app chrome. -->
+    <style name="ThemeOverlay.OpenTypeBeat.Popup" parent="ThemeOverlay.Material3.Dark" />
+
     <style name="Theme.OpenTypeBeat" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/otb_primary</item>
         <item name="colorOnPrimary">@color/otb_on_primary</item>

@@ -47,8 +47,15 @@ class PageMirrorPlayer(
         this.artist = artist
         this.artwork = artwork
         this.playing = playing
-        this.positionMs = (positionSeconds * 1000).toLong().coerceAtLeast(0)
-        this.durationMs = if (durationSeconds > 0) (durationSeconds * 1000).toLong() else C.TIME_UNSET
+        this.durationMs = if (durationSeconds > 0 && durationSeconds.isFinite()) {
+            (durationSeconds * 1000).toLong()
+        } else {
+            C.TIME_UNSET
+        }
+        val rawPosition = if (positionSeconds.isFinite()) (positionSeconds * 1000).toLong() else 0L
+        this.positionMs = rawPosition.coerceAtLeast(0).let {
+            if (durationMs != C.TIME_UNSET) it.coerceAtMost(durationMs) else it
+        }
         invalidateState()
     }
 

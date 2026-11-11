@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         app:title="@string/app_name"
+        app:popupTheme="@style/ThemeOverlay.OpenTypeBeat.Popup"
         app:titleTextColor="@color/otb_primary"
         app:actionMenuTextColor="#FFFFFF"
         android:theme="@style/ThemeOverlay.OpenTypeBeat.Toolbar" />

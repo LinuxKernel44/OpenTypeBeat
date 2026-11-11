@@ -23,6 +23,10 @@
         android:title="@string/menu_desktop"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_share_log"
+        android:title="@string/menu_share_log"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_settings"
         android:title="@string/settings"
         app:showAsAction="never" />

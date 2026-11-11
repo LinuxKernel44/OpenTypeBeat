@@ -11,6 +11,7 @@ class OpenTypeBeatApp : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        CrashLog.install(this)
     }
 
     companion object {

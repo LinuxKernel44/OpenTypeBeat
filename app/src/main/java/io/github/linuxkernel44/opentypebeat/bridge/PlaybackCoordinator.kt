@@ -160,15 +160,19 @@ class PlaybackCoordinator(private val app: Application) {
         if (state.id.isEmpty()) return
         PoTokenStore.onPageSession(json.optString("vd"), json.optBoolean("loggedIn"))
         latest = state
-        PlayerHolder.mirror(app).update(
-            id = state.id,
-            title = state.title,
-            artist = state.artist,
-            artwork = state.art,
-            playing = state.playing && !state.ad,
-            positionSeconds = state.pos,
-            durationSeconds = state.dur,
-        )
+        try {
+            PlayerHolder.mirror(app).update(
+                id = state.id,
+                title = state.title,
+                artist = state.artist,
+                artwork = state.art,
+                playing = state.playing && !state.ad,
+                positionSeconds = state.pos,
+                durationSeconds = state.dur,
+            )
+        } catch (e: Throwable) {
+            Log.e(TAG, "Could not update the mirror player", e)
+        }
         onPageState(state)
     }
 
@@ -254,9 +258,10 @@ class PlaybackCoordinator(private val app: Application) {
                     player.prepare()
                     player.playWhenReady = s?.playing ?: true
                 }
+                armWatchdog(videoId)
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 Log.e(TAG, "Extraction failed for $videoId (retry=$retry)", e)
                 consecutiveFailures++
                 // Fall back to the page's own audio so the user is never left in silence.
@@ -272,8 +277,29 @@ class PlaybackCoordinator(private val app: Application) {
         }
     }
 
+    private var watchdog: Runnable? = null
+
+    /**
+     * If the page is playing but the native player has not produced audio a few seconds after
+     * the extracted stream was handed over (silent failure), give the audio back to the page.
+     */
+    private fun armWatchdog(videoId: String) {
+        watchdog?.let { main.removeCallbacks(it) }
+        val check = Runnable {
+            val s = latest
+            if (currentId == videoId && s != null && s.id == videoId && s.playing && !s.ad && !player.isPlaying) {
+                Log.w(TAG, "Native player is not playing (state=${player.playbackState}); falling back to page audio")
+                consecutiveFailures++
+                usePageAudio()
+            }
+        }
+        watchdog = check
+        main.postDelayed(check, WATCHDOG_MS)
+    }
+
     /** The page plays its own audio; the native player stays idle. */
     private fun usePageAudio() {
+        watchdog?.let { main.removeCallbacks(it) }
         sendCommand("pageAudio", "value" to true)
         applyRemote {
             player.stop()
@@ -282,7 +308,27 @@ class PlaybackCoordinator(private val app: Application) {
     }
 
     private fun ensureServiceRunning() {
-        ContextCompat.startForegroundService(app, Intent(app, PlaybackService::class.java))
+        val intent = Intent(app, PlaybackService::class.java)
+        try {
+            // A plain start: Media3 promotes the service to the foreground itself once playback
+            // starts. startForegroundService() would crash if that never happens in time.
+            app.startService(intent)
+        } catch (e: IllegalStateException) {
+            // App is in the background: only a foreground start is allowed, and the service must
+            // then reach the foreground in time. That only happens while something is playing
+            // (Media3 posts the notification), so never do it otherwise.
+            if (PlayerHolder.mirror(app).isPlaying) {
+                try {
+                    ContextCompat.startForegroundService(app, intent)
+                } catch (e2: Throwable) {
+                    Log.w(TAG, "Could not start the playback service", e2)
+                }
+            } else {
+                Log.i(TAG, "Playback service not started: app in background and nothing playing")
+            }
+        } catch (e: Throwable) {
+            Log.w(TAG, "Could not start the playback service", e)
+        }
     }
 
     private inline fun applyRemote(block: () -> Unit) {
@@ -297,5 +343,6 @@ class PlaybackCoordinator(private val app: Application) {
     companion object {
         private const val TAG = "PlaybackCoordinator"
         private const val DRIFT_SECONDS = 2.0
+        private const val WATCHDOG_MS = 9000L
     }
 }
